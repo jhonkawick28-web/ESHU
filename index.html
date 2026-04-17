@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="E.S.H.U">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#000000">
+<meta name="msapplication-TileColor" content="#000000">
+<meta name="application-name" content="E.S.H.U">
+<!-- PWA Manifest (inline dataURL for single-file portability) -->
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22E.S.H.U%20%E2%80%94%20MARK%20XXXV%22%2C%22short_name%22%3A%22E.S.H.U%22%2C%22description%22%3A%22Extremely%20Smart%20Hyper-Intelligent%20Unit%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22fullscreen%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ccircle%20cx%3D'50'%20cy%3D'50'%20r%3D'50'%20fill%3D'%23000'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'55%25'%20text-anchor%3D'middle'%20font-size%3D'28'%20fill%3D'%2300d4ff'%20font-family%3D'monospace'%3EESHU%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<title>E.S.H.U — MARK XXXV</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#00d4ff;--mid:#007a99;--dim:#003344;--dimmer:#001520;
+  --acc:#ff6600;--acc2:#ffcc00;--text:#8ffcff;--green:#00ff88;
+  --red:#ff3333;--muted:#ff3366;--panel:#010c10;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;
+  -webkit-tap-highlight-color:transparent;tap-highlight-color:transparent;}
+html{
+  width:100%;height:100%;
+  /* Prevent elastic bounce on iOS/Android */
+  overscroll-behavior:none;
+  -webkit-overflow-scrolling:touch;
+}
+body{
+  width:100%;background:#000;color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;
+  touch-action:manipulation;
+  /* Fill entire screen including safe areas */
+  min-height:100vh;
+  min-height:100dvh; /* dynamic viewport height — handles mobile keyboard */
+  padding-top:var(--safe-top);
+  padding-bottom:var(--safe-bottom);
+  padding-left:var(--safe-left);
+  padding-right:var(--safe-right);
+}
+#hud{position:fixed;inset:0;z-index:0}
+#overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;pointer-events:none;
+  padding-top:var(--safe-top);
+  padding-bottom:var(--safe-bottom);
+}
+/* HEADER */
+#header{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--mid);background:rgba(0,8,13,.94);position:relative;pointer-events:all;
+  /* Prevent header from being obscured by notch */
+  padding-left:max(10px, var(--safe-left));
+  padding-right:max(10px, var(--safe-right));
+}
+.hname{font-family:'Orbitron',sans-serif;font-size:clamp(14px,4.5vw,19px);font-weight:900;color:var(--pri);letter-spacing:5px;text-shadow:0 0 18px var(--pri),0 0 40px rgba(0,212,255,.3);display:block;text-align:center}
+.hsub{font-size:clamp(6px,1.9vw,8.5px);color:var(--mid);letter-spacing:2px;display:block;text-align:center}
+#badge{position:absolute;left:10px;font-size:7px;color:var(--dim);letter-spacing:1px;line-height:1.4}
+#clock{position:absolute;right:10px;font-family:'Orbitron',sans-serif;font-size:clamp(11px,3vw,14px);color:var(--pri);text-shadow:0 0 10px var(--pri)}
+#btn-gear{position:absolute;right:68px;background:none;border:none;color:var(--dim);font-size:17px;cursor:pointer;padding:5px 8px;transition:color .2s;line-height:1}
+#btn-gear:active{color:var(--pri)}
+#canvas-space{flex:1;min-height:0;pointer-events:none}
+/* STATUS */
+#status-wrap{text-align:center;padding:2px 0;pointer-events:none}
+#status-lbl{font-family:'Orbitron',sans-serif;font-size:clamp(9px,2.8vw,12px);font-weight:700;letter-spacing:3px;transition:color .3s;text-shadow:0 0 12px currentColor}
+/* LOG */
+#log-wrap{margin:4px 10px;background:var(--panel);border:1px solid var(--mid);border-radius:4px;height:115px;overflow-y:auto;padding:6px 10px;pointer-events:all;scrollbar-width:none}
+#log-wrap::-webkit-scrollbar{display:none}
+#log{font-size:clamp(9px,2.6vw,11px);line-height:1.65}
+.ly{color:#e0e0e0}.le{color:var(--pri)}.ls{color:var(--acc2)}.lr{color:var(--red)}.lt{color:var(--mid)}
+/* INPUT */
+#input-row{display:flex;gap:5px;margin:4px 10px 3px;pointer-events:all;
+  /* On Android, when keyboard opens, this stays visible */
+  position:relative;z-index:1;
+}
+#txt-in{flex:1;background:#000d12;border:1px solid var(--dim);border-radius:4px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:clamp(11px,3vw,13px);padding:8px 10px;outline:none;caret-color:var(--pri);-webkit-user-select:text;user-select:text;transition:border-color .2s,box-shadow .2s}
+#txt-in:focus{border-color:var(--pri);box-shadow:0 0 8px rgba(0,212,255,.2)}
+#txt-in::placeholder{color:#006070}
+.btn{background:var(--panel);border:1px solid var(--dim);border-radius:4px;color:var(--pri);font-family:'Share Tech Mono',monospace;font-size:clamp(10px,2.8vw,12px);padding:8px 11px;cursor:pointer;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.btn:active{background:rgba(0,212,255,.12);transform:scale(.97)}
+/* BUTTON ROW */
+#btn-row{display:flex;gap:5px;margin:0 10px 5px;pointer-events:all}
+#btn-mic,#btn-mute{flex:1}
+#btn-mic{color:var(--green);border-color:#003322}
+#btn-mute{color:var(--green);border-color:#003322}
+#btn-mic.live{color:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(0,255,136,.3);animation:glow-green .8s infinite}
+#btn-mic.muted-mic{color:var(--dim);border-color:var(--dim)}
+#btn-mute.muted{color:var(--muted);border-color:var(--muted)}
+@keyframes glow-green{0%,100%{box-shadow:0 0 6px rgba(0,255,136,.2)}50%{box-shadow:0 0 18px rgba(0,255,136,.6)}}
+/* FOOTER */
+#footer{height:25px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-top:1px solid var(--dimmer);background:rgba(0,8,13,.92);font-size:7.5px;color:var(--dim);letter-spacing:2px;pointer-events:none;
+  /* Account for home indicator on Android/iPhone */
+  padding-bottom:var(--safe-bottom);
+  height:calc(25px + var(--safe-bottom));
+}
+/* BOOT SCREEN */
+#boot{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s}
+#boot.hidden{opacity:0;pointer-events:none}
+#boot-logo{font-family:'Orbitron',sans-serif;font-size:clamp(28px,9vw,50px);font-weight:900;color:var(--pri);letter-spacing:10px;text-shadow:0 0 30px var(--pri),0 0 80px rgba(0,212,255,.4);animation:flicker 3s infinite}
+@keyframes flicker{0%,95%,100%{opacity:1}96%{opacity:.7}97%{opacity:1}98%{opacity:.5}}
+#boot-sub{font-size:clamp(8px,2.5vw,11px);color:var(--mid);letter-spacing:3px;text-align:center}
+#boot-bar-wrap{width:min(80vw,300px);height:2px;background:var(--dimmer);border-radius:2px;overflow:hidden}
+#boot-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--mid),var(--pri));border-radius:2px;transition:width .4s ease;box-shadow:0 0 10px var(--pri)}
+#boot-msg{font-size:clamp(9px,2.4vw,11px);color:var(--mid);letter-spacing:1px;min-height:18px}
+/* API MODAL */
+#api-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.93);display:none;align-items:center;justify-content:center}
+#api-modal.show{display:flex}
+#api-box{background:#00080d;border:1px solid rgba(0,212,255,.45);border-radius:8px;padding:26px 20px;width:min(94vw,420px);text-align:center;box-shadow:0 0 40px rgba(0,212,255,.1)}
+#api-box h2{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--pri);letter-spacing:2px;margin-bottom:8px}
+#api-box p{font-size:11px;color:var(--mid);margin-bottom:16px;line-height:1.6}
+#api-box a{color:var(--pri);text-decoration:none}
+#api-in{width:100%;background:#000d12;border:1px solid var(--dim);border-radius:4px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:10px 12px;outline:none;text-align:center;margin-bottom:6px;-webkit-user-select:text;user-select:text;transition:border-color .2s}
+#api-in:focus{border-color:var(--pri)}
+#api-err{font-size:10px;color:var(--red);min-height:16px;margin-bottom:8px}
+#api-go{width:100%;background:rgba(0,212,255,.08);border:1px solid var(--pri);border-radius:4px;color:var(--pri);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;padding:13px;cursor:pointer;transition:background .2s}
+#api-go:active{background:rgba(0,212,255,.2)}
+#api-go:disabled{opacity:.5;cursor:default}
+#api-link{display:block;margin-top:12px;font-size:10px;color:var(--dim)}
+/* SETTINGS */
+#sp{position:fixed;inset:0;z-index:250;display:flex;justify-content:flex-end;pointer-events:none}
+#si{width:min(90vw,320px);height:100%;background:rgba(0,8,13,.97);border-left:1px solid var(--mid);padding:20px 16px;display:flex;flex-direction:column;gap:12px;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:all;overflow-y:auto}
+#sp.open #si{transform:translateX(0)}
+#sp.open{pointer-events:all}
+#sp::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .3s;pointer-events:none}
+#sp.open::before{background:rgba(0,0,0,.55);pointer-events:all}
+.st{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--pri);letter-spacing:2px;border-bottom:1px solid var(--dimmer);padding-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.sc{background:none;border:none;color:var(--mid);font-size:20px;cursor:pointer;padding:0 4px;line-height:1}
+.sc:active{color:var(--pri)}
+.sl{font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:4px}
+.sinp{width:100%;background:#000d12;border:1px solid var(--dim);border-radius:4px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:9px 10px;outline:none;-webkit-user-select:text;user-select:text;transition:border-color .2s}
+.sinp:focus{border-color:var(--pri)}
+.sbtn{width:100%;background:rgba(0,212,255,.06);border:1px solid var(--mid);border-radius:4px;color:var(--pri);font-family:'Share Tech Mono',monospace;font-size:11px;padding:10px;cursor:pointer;letter-spacing:1px;transition:background .15s}
+.sbtn:active{background:rgba(0,212,255,.15)}
+.sbtn:disabled{opacity:.5;cursor:default}
+.sbtn.dng{color:var(--red);border-color:#330011}
+.sbtn.dng:active{background:rgba(255,51,102,.12)}
+.sinfo{font-size:10px;color:var(--mid);line-height:1.7}
+.sinfo span{color:var(--text)}
+.sdiv{border:none;border-top:1px solid var(--dimmer)}
+.sst{font-size:10px;color:var(--green);text-align:center;min-height:14px}
+/* CAMERA MODAL */
+#cam-modal{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#cam-modal.show{display:flex}
+#cam-video{max-width:90vw;max-height:50vh;border:1px solid var(--pri);border-radius:4px}
+#cam-canvas{display:none}
+#cam-label{font-size:11px;color:var(--mid)}
+#cam-capture{background:rgba(0,212,255,.08);border:1px solid var(--pri);border-radius:4px;color:var(--pri);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;padding:12px 24px;cursor:pointer}
+#cam-cancel{font-size:10px;color:var(--dim);cursor:pointer;padding:4px 8px;background:none;border:none}
+
+/* ── FULLSCREEN BANNER ── */
+#fs-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:rgba(0,212,255,.08);
+  border-top:1px solid rgba(0,212,255,.3);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:10px 16px;
+  padding-bottom:calc(10px + var(--safe-bottom));
+  cursor:pointer;
+  animation:fsbannerslide .5s ease;
+  transition:opacity .3s;
+}
+#fs-banner.hidden{opacity:0;pointer-events:none;}
+@keyframes fsbannerslide{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#fs-banner span{
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;
+  color:var(--pri);
+  letter-spacing:2px;
+  text-shadow:0 0 10px var(--pri);
+}
+#fs-banner svg{width:16px;height:16px;fill:var(--pri);flex-shrink:0;}
+
+/* ── ANDROID KEYBOARD FIX ── */
+@media (max-height: 500px) {
+  #log-wrap{height:60px;}
+  #canvas-space{display:none;}
+  #status-wrap{display:none;}
+}
+
+/* ── ANDROID NOTCH / EDGE-TO-EDGE ── */
+@supports(padding: env(safe-area-inset-top)) {
+  body{background-attachment:fixed;}
+}
+</style>
+</head>
+<body>
+<canvas id="hud"></canvas>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="boot-logo">E.S.H.U</div>
+  <div id="boot-sub">EXTREMELY SMART HYPER-INTELLIGENT UNIT</div>
+  <div id="boot-bar-wrap"><div id="boot-bar"></div></div>
+  <div id="boot-msg">INITIALISING CORE SYSTEMS…</div>
+</div>
+
+<!-- API KEY MODAL -->
+<div id="api-modal">
+  <div id="api-box">
+    <h2>◈ INITIALISATION REQUIRED</h2>
+    <p>E.S.H.U needs your Gemini API key to boot.<br>
+    Stored <strong>only on this device</strong> — never sent elsewhere.<br>
+    Use the <strong>same key</strong> as your PC version.</p>
+    <input id="api-in" type="password" placeholder="Paste Gemini API key (AIzaSy…)" autocomplete="off" spellcheck="false">
+    <div id="api-err"></div>
+    <button id="api-go">▸ BOOT ESHU</button>
+    <a id="api-link" href="https://aistudio.google.com/apikey" target="_blank">↗ Get a free key at aistudio.google.com/apikey</a>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="sp">
+  <div id="si">
+    <div class="st">⚙ SYSTEMS CONFIG <button class="sc" id="sclose">✕</button></div>
+    <div><div class="sl">REPLACE API KEY</div>
+    <input class="sinp" id="s-key" type="password" placeholder="Paste new key…" autocomplete="off" spellcheck="false"></div>
+    <button class="sbtn" id="s-save">💾 SAVE &amp; RECONNECT</button>
+    <div class="sst" id="s-st"></div>
+    <hr class="sdiv">
+    <div class="sinfo">
+      <div style="color:var(--dim);letter-spacing:1px;font-size:9px;margin-bottom:6px">SYSTEM INFO</div>
+      API Key: <span id="i-key">—</span><br>
+      Memory items: <span id="i-mem">0</span><br>
+      Connection: <span id="i-conn">offline</span>
+    </div>
+    <hr class="sdiv">
+    <button class="sbtn" id="s-reconnect">🔌 RECONNECT</button>
+    <button class="sbtn" id="s-clrmem">🧠 CLEAR MEMORY</button>
+    <button class="sbtn dng" id="s-reset">⚠ FULL RESET</button>
+  </div>
+</div>
+
+<!-- CAMERA MODAL -->
+<div id="cam-modal">
+  <div id="cam-label">VISUAL PROCESSING — Position camera then capture</div>
+  <video id="cam-video" autoplay playsinline muted></video>
+  <canvas id="cam-canvas"></canvas>
+  <button id="cam-capture">📷 CAPTURE &amp; ANALYSE</button>
+  <button id="cam-cancel">Cancel</button>
+</div>
+
+<!-- FULLSCREEN BANNER -->
+<div id="fs-banner" class="hidden">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+  </svg>
+  <span>◈ TAP TO ENTER FULLSCREEN</span>
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+  </svg>
+</div>
+
+<!-- MAIN UI -->
+<div id="overlay">
+  <div id="header">
+    <span id="badge">MARK XXXV<br>LIVE API</span>
+    <div><span class="hname">E.S.H.U</span><span class="hsub">EXTREMELY SMART HYPER-INTELLIGENT UNIT</span></div>
+    <button id="btn-gear">⚙</button>
+    <div id="clock">--:--:--</div>
+  </div>
+  <div id="canvas-space"></div>
+  <div id="status-wrap"><span id="status-lbl">◌ INITIALISING</span></div>
+  <div id="log-wrap"><div id="log"></div></div>
+  <div id="input-row">
+    <input id="txt-in" type="text" placeholder="Type a command to ESHU…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="btn" id="btn-send">SEND ▸</button>
+  </div>
+  <div id="btn-row">
+    <button class="btn" id="btn-mic">🎤  START MIC</button>
+    <button class="btn" id="btn-mute">🎙  LIVE</button>
+  </div>
+  <div id="footer">FatihMakes Industries &nbsp;·&nbsp; CLASSIFIED &nbsp;·&nbsp; MARK XXXV &nbsp;·&nbsp; GEMINI LIVE</div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════
+const LIVE_MODEL  = 'models/gemini-2.5-flash-native-audio-preview-12-2025';
+const LIVE_MODEL2 = 'models/gemini-2.0-flash-live-001'; // fallback
+const WS_BASE     = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+const KEY_STORE   = 'eshu_api_key';
+const MEM_STORE   = 'eshu_memory';
+
+const GREETINGS = [
+  "Systems online. All modules operational. How can I assist you?",
+  "ESHU online. Standing by for your command.",
+  "All systems green. What do you need today?",
+  "Neural core active. I'm here. What's on the agenda?",
+  "Good to be back online. Ready when you are.",
+];
+
+const SYS_PROMPT = `You are E.S.H.U (Extremely Smart Hyper-intelligent Unit), Eshanth's advanced personal AI assistant.
+
+You are currently running in a web browser on Android (or desktop). Your audio is streamed in real-time via Gemini Live.
+
+Personality: Highly intelligent, direct, confident, occasionally witty. You are ESHU — act like it.
+
+Available tools on this platform:
+- web_search: Search the web for any current information, news, facts
+- weather_report: Real-time weather for any city  
+- youtube_video: Find and describe YouTube videos
+- save_memory: Save important user info silently to long-term memory
+- recall_memory: Retrieve saved memory
+- list_memory: List all saved memories
+- screen_process: Activate camera to visually analyse what the user shows you
+- set_reminder: Set a browser notification reminder
+- flight_finder: Search for flight information
+
+NOT available on Android/browser: open_app, computer_settings, cmd_control, browser_control, file_controller, desktop_control, send_message, game_updater, computer_control, dev_agent, code_helper.
+
+If asked for an unavailable feature, say so briefly and suggest an alternative if possible.
+
+Rules:
+- ALWAYS call tools for real-world data. Never guess weather, news, or facts.
+- Keep spoken responses SHORT (1-3 sentences) unless detail is requested.
+- Call save_memory SILENTLY whenever user reveals something worth remembering (name, city, preferences, projects). Do NOT announce it.
+- You speak with Charon's voice — be worthy of it.`;
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let apiKey = '', memory = {}, muted = false;
+let eshuState = 'INITIALISING', blinkOn = true, tick = 0;
+let scanA = 0, scanB = 180, scanC = 90;
+
+// ═══════════════════════════════════════════════════
+//  ANIMATION STATE
+// ═══════════════════════════════════════════════════
+// Smoothed waveform bars (exponential moving average)
+const WAVE_N = 36;
+const waveBars = new Float32Array(WAVE_N).fill(0.08);
+const waveTarget = new Float32Array(WAVE_N).fill(0.08);
+
+// Particle system for SPEAKING state
+const MAX_PARTICLES = 60;
+const particles = [];
+function spawnParticle(cx, cy, BR, oc) {
+  if (particles.length >= MAX_PARTICLES) return;
+  const angle = Math.random() * Math.PI * 2;
+  const speed = 0.4 + Math.random() * 1.4;
+  const dist  = BR * (0.85 + Math.random() * 0.3);
+  particles.push({
+    x: cx + Math.cos(angle) * dist,
+    y: cy + Math.sin(angle) * dist,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
+    life: 1.0,
+    decay: 0.018 + Math.random() * 0.025,
+    size: 1.2 + Math.random() * 2.2,
+    oc,
+  });
+}
+
+// WebSocket / Audio
+let ws = null, wsReady = false, wsModel = LIVE_MODEL;
+let audioCtx = null, micStream = null, micSource = null, processor = null;
+let micActive = false;
+let playbackQueue = [], isPlaying = false;
+let outputBuf = [], inputBuf = [];
+let camStream = null;
+
+// ═══════════════════════════════════════════════════
+//  CANVAS HUD
+// ═══════════════════════════════════════════════════
+const canvas = document.getElementById('hud');
+const ctx    = canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+window.addEventListener('resize',resize); resize();
+
+const SCLR = {
+  LISTENING:  [0,212,255],
+  SPEAKING:   [255,102,0],
+  THINKING:   [255,204,0],
+  MUTED:      [255,51,102],
+  INITIALISING:[0,100,130],
+  CONNECTING: [255,204,0]
+};
+
+function drawHUD(){
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const sp=document.getElementById('canvas-space').getBoundingClientRect();
+  const cx=W/2, cy=sp.top+sp.height*0.5;
+  const BR=Math.min(W, sp.height)*0.145;
+  const cur=muted?'MUTED':eshuState;
+  const oc=SCLR[cur]||SCLR.LISTENING;
+  const isSpeaking = cur==='SPEAKING';
+  const isThinking = cur==='THINKING'||cur==='CONNECTING';
+
+  // ── grid ──
+  ctx.strokeStyle='rgba(0,46,61,0.07)'; ctx.lineWidth=0.5;
+  for(let x=0;x<W;x+=38){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=38){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // ── speaking ring breath ──
+  // Rings expand outward in SPEAKING state
+  const breathAmp = isSpeaking ? 0.055 : isThinking ? 0.025 : 0.01;
+  const breath = Math.sin(tick * (isSpeaking ? 0.19 : 0.07)) * breathAmp;
+
+  // ── static outer rings ──
+  [[3.2+breath*2,.07],[2.5+breath*1.5,.09]].forEach(([m,a])=>{
+    ctx.strokeStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},${a})`;
+    ctx.lineWidth=0.6;
+    ctx.beginPath();ctx.arc(cx,cy,BR*m,0,Math.PI*2);ctx.stroke();
+  });
+
+  // ── arc segments (spin faster when speaking) ──
+  const arcSpeed = isSpeaking ? 1 : isThinking ? 0.7 : 0.4;
+  const arcR = BR * (2.05 + breath);
+  const segs = 6;
+  for(let i=0;i<segs;i++){
+    const start = (scanA * Math.PI/180) + (i * Math.PI*2/segs);
+    const end   = start + Math.PI/segs * 0.55;
+    ctx.strokeStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},${isSpeaking?0.6:0.25})`;
+    ctx.lineWidth  = isSpeaking ? 1.6 : 0.8;
+    ctx.beginPath();ctx.arc(cx,cy,arcR,start,end);ctx.stroke();
+  }
+
+  // ── rotating ring A (main) ──
+  const rA=BR*2, aR=scanA*Math.PI/180;
+  ctx.strokeStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},${isSpeaking?0.65:0.42})`;
+  ctx.lineWidth=isSpeaking?1.3:0.9;
+  ctx.beginPath();ctx.arc(cx,cy,rA,0,Math.PI*2);ctx.stroke();
+  // dot on ring A
+  const dotSz = isSpeaking ? 5+Math.sin(tick*0.4)*1.5 : 4;
+  ctx.fillStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},1)`;
+  ctx.beginPath();ctx.arc(cx+rA*Math.cos(aR),cy+rA*Math.sin(aR),dotSz,0,Math.PI*2);ctx.fill();
+  // dot glow
+  const dg=ctx.createRadialGradient(cx+rA*Math.cos(aR),cy+rA*Math.sin(aR),0,cx+rA*Math.cos(aR),cy+rA*Math.sin(aR),dotSz*3);
+  dg.addColorStop(0,`rgba(${oc[0]},${oc[1]},${oc[2]},${isSpeaking?0.5:0.2})`);
+  dg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=dg;ctx.beginPath();ctx.arc(cx+rA*Math.cos(aR),cy+rA*Math.sin(aR),dotSz*3,0,Math.PI*2);ctx.fill();
+
+  // ── rotating ring B ──
+  const rB=BR*1.55, bR=scanB*Math.PI/180;
+  ctx.strokeStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},.26)`;ctx.lineWidth=0.6;
+  ctx.beginPath();ctx.arc(cx,cy,rB,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},.75)`;
+  ctx.beginPath();ctx.arc(cx+rB*Math.cos(bR),cy+rB*Math.sin(bR),2.5,0,Math.PI*2);ctx.fill();
+
+  // ── rotating ring C (outer slow) ──
+  const rC=BR*2.8, cR=scanC*Math.PI/180;
+  ctx.strokeStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},.09)`;ctx.lineWidth=0.4;
+  ctx.beginPath();ctx.arc(cx,cy,rC,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},.45)`;
+  ctx.beginPath();ctx.arc(cx+rC*Math.cos(cR),cy+rC*Math.sin(cR),2,0,Math.PI*2);ctx.fill();
+
+  // ── particles (SPEAKING only) ──
+  if(isSpeaking && tick%3===0 && particles.length < MAX_PARTICLES){
+    spawnParticle(cx, cy, BR, oc);
+  }
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx; p.y+=p.vy;
+    p.vx*=0.96; p.vy*=0.96;
+    p.life-=p.decay;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    ctx.globalAlpha=p.life*0.85;
+    ctx.fillStyle=`rgba(${p.oc[0]},${p.oc[1]},${p.oc[2]},1)`;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  // ── orb multi-layer glow ──
+  const glowLayers = isSpeaking ? 10 : 7;
+  const glowBase   = isSpeaking
+    ? 0.80 + 0.18*Math.sin(tick*0.28)
+    : isThinking
+    ? 0.62 + 0.12*Math.sin(tick*0.18)
+    : 0.50 + 0.09*Math.sin(tick*0.09);
+  for(let i=glowLayers;i>0;i--){
+    const gr=BR*(0.62+i*0.15);
+    const ga=glowBase*(i/glowLayers)*0.38;
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,gr);
+    g.addColorStop(0,`rgba(${oc[0]},${oc[1]},${oc[2]},${ga})`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,gr,0,Math.PI*2);ctx.fill();
+  }
+
+  // ── orb core ──
+  const orbPulse = isSpeaking ? 1 + 0.04*Math.sin(tick*0.32) : 1;
+  const orbR = BR * orbPulse;
+  const cg=ctx.createRadialGradient(cx-orbR*0.2,cy-orbR*0.2,0,cx,cy,orbR);
+  cg.addColorStop(0,`rgba(${Math.round(oc[0]*.9)},${Math.round(oc[1]*.9)},${Math.round(oc[2]*.9)},1)`);
+  cg.addColorStop(0.5,`rgba(${Math.round(oc[0]*.4)},${Math.round(oc[1]*.4)},${Math.round(oc[2]*.4)},.92)`);
+  cg.addColorStop(1,`rgba(${Math.round(oc[0]*.08)},${Math.round(oc[1]*.08)},${Math.round(oc[2]*.08)},.6)`);
+  ctx.fillStyle=cg;ctx.beginPath();ctx.arc(cx,cy,orbR,0,Math.PI*2);ctx.fill();
+
+  // ── orb specular highlight (top-left) ──
+  const sg=ctx.createRadialGradient(cx-orbR*0.28,cy-orbR*0.28,0,cx-orbR*0.2,cy-orbR*0.2,orbR*0.55);
+  sg.addColorStop(0,'rgba(255,255,255,0.22)');
+  sg.addColorStop(0.4,'rgba(255,255,255,0.07)');
+  sg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=sg;ctx.beginPath();ctx.arc(cx,cy,orbR,0,Math.PI*2);ctx.fill();
+
+  // ── inner ring (engraved look) ──
+  ctx.strokeStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},${isSpeaking?0.22:0.10})`;
+  ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.arc(cx,cy,orbR*0.72,0,Math.PI*2);ctx.stroke();
+
+  // ── waveform bars (above orb) ──
+  // Update smoothed targets
+  for(let i=0;i<WAVE_N;i++){
+    if(muted){
+      waveTarget[i]=0.08;
+    } else if(isSpeaking){
+      // Center bars taller, edges shorter — natural speech envelope
+      const norm=(i/(WAVE_N-1))*2-1; // -1..1
+      const env=1-Math.pow(norm,2)*0.4;
+      waveTarget[i]=(0.08 + Math.random()*0.92)*env;
+    } else if(isThinking){
+      waveTarget[i]=0.15+0.18*Math.sin(tick*0.13+i*0.38);
+    } else {
+      waveTarget[i]=0.07+0.08*Math.sin(tick*0.07+i*0.5);
+    }
+    const alpha = isSpeaking ? (waveTarget[i]>waveBars[i] ? 0.42 : 0.12) : 0.18;
+    waveBars[i]+=(waveTarget[i]-waveBars[i])*alpha;
+  }
+
+  const BH=isSpeaking?22:14, bw=Math.min(8,(W*0.75)/WAVE_N);
+  const wx0=cx-(WAVE_N*bw)/2;
+  const wY=cy-orbR-14;
+
+  for(let i=0;i<WAVE_N;i++){
+    const h=waveBars[i]*BH;
+    let col;
+    if(muted){
+      col='rgba(255,51,102,0.4)';
+    } else if(isSpeaking){
+      const bright=0.45+0.55*(h/BH);
+      col=`rgba(${oc[0]},${oc[1]},${oc[2]},${bright})`;
+      ctx.fillStyle=`rgba(${oc[0]},${oc[1]},${oc[2]},${bright*0.35})`;
+      ctx.beginPath();
+      ctx.roundRect(wx0+i*bw, wY+2, bw-2, h*0.5, 2);
+      ctx.fill();
+    } else if(isThinking){
+      col=`rgba(${oc[0]},${oc[1]},${oc[2]},0.38)`;
+    } else {
+      col='rgba(0,71,97,0.55)';
+    }
+    ctx.fillStyle=col;
+    ctx.beginPath();
+    ctx.roundRect(wx0+i*bw, wY-h, bw-2, h, 2);
+    ctx.fill();
+  }
+}
+const SCOL={LISTENING:'#00ff88',SPEAKING:'#ff6600',THINKING:'#ffcc00',MUTED:'#ff3366',INITIALISING:'#00d4ff',CONNECTING:'#ffcc00'};
+const slbl=document.getElementById('status-lbl');
+function updateStatus(){
+  const s=muted?'MUTED':eshuState;
+  const t=s==='MUTED'?'⊘ MUTED':s==='SPEAKING'?'● SPEAKING':s==='THINKING'?(blinkOn?'◈':'◇')+' THINKING':s==='CONNECTING'?(blinkOn?'◈':'◇')+' CONNECTING':s==='LISTENING'?(blinkOn?'●':'○')+' LISTENING'+(micActive?' [MIC ON]':''):'◌ '+s;
+  slbl.textContent=t;slbl.style.color=SCOL[s]||'#00d4ff';
+}
+function updateClock(){const n=new Date(),p=v=>String(v).padStart(2,'0');document.getElementById('clock').textContent=`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;}
+function animLoop(){tick++;scanA=(scanA+2.2)%360;scanB=(scanB+1.5)%360;scanC=(scanC-.8+360)%360;if(tick%18===0)blinkOn=!blinkOn;drawHUD();updateStatus();updateClock();requestAnimationFrame(animLoop);}
+animLoop();
+
+// ═══════════════════════════════════════════════════
+//  LOG
+// ═══════════════════════════════════════════════════
+const logEl=document.getElementById('log'),logWrap=document.getElementById('log-wrap');
+function writeLog(text,cls='ls'){const d=document.createElement('div');d.className=cls;d.textContent=text;logEl.appendChild(d);while(logEl.children.length>100)logEl.removeChild(logEl.firstChild);logWrap.scrollTop=logWrap.scrollHeight;}
+function setState(s){eshuState=s;}
+
+// ═══════════════════════════════════════════════════
+//  MEMORY (mirrors original memory_manager structure)
+// ═══════════════════════════════════════════════════
+function loadMemory(){try{return JSON.parse(localStorage.getItem(MEM_STORE)||'{}');}catch(e){return {};}}
+function saveMemory(){localStorage.setItem(MEM_STORE,JSON.stringify(memory));}
+function formatMemory(){
+  const lines=[];
+  for(const [cat,items] of Object.entries(memory)){
+    if(typeof items==='object'&&items!==null&&!Array.isArray(items)){
+      for(const [k,v] of Object.entries(items)){
+        const val=typeof v==='object'?v.value||JSON.stringify(v):v;
+        lines.push(`  [${cat}] ${k}: ${val}`);
+      }
+    } else {lines.push(`  ${cat}: ${items}`);}
+  }
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════
+//  TOOLS
+// ═══════════════════════════════════════════════════
+async function toolWebSearch(q){
+  try{
+    const r=await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`);
+    const d=await r.json();
+    let out=d.AbstractText||d.Answer||'';
+    if(!out&&d.RelatedTopics?.length)out=d.RelatedTopics.filter(t=>t.Text).slice(0,4).map((t,i)=>`[${i+1}] ${t.Text}`).join('\n');
+    return out||`No instant answer found for: "${q}". Please try a more specific search term.`;
+  }catch(e){return `Web search error: ${e.message}`;}
+}
+async function toolWeather(city){
+  try{
+    const r=await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const d=await r.json();
+    const c=d.current_condition[0],l=d.nearest_area[0];
+    let fc='';
+    (d.weather||[]).slice(0,2).forEach(day=>{const desc=day.hourly[4]?.weatherDesc[0]?.value||'';fc+=`\n  ${day.date}: ${desc}, ${day.mintempC}°C – ${day.maxtempC}°C`;});
+    return `📍 ${l.areaName[0].value}, ${l.country[0].value}\n🌡 ${c.weatherDesc[0].value} · ${c.temp_C}°C (feels ${c.FeelsLikeC}°C)\n💧 Humidity ${c.humidity}% · 💨 Wind ${c.windspeedKmph}km/h ${c.winddir16Point}${fc?'\n📅 Forecast:'+fc:''}`;
+  }catch(e){return `Weather error for "${city}": ${e.message}`;}
+}
+async function toolYouTube(action,query,url){
+  try{
+    const q=query?`site:youtube.com ${query}`:`site:youtube.com ${url||''}`;
+    const r=await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+    const d=await r.json();
+    const vids=(d.RelatedTopics||[]).filter(t=>t.FirstURL?.includes('youtube.com')).slice(0,4);
+    if(!vids.length)return `No YouTube results found for: ${query}`;
+    return `YouTube results for "${query}":\n`+vids.map((t,i)=>`[${i+1}] ${(t.Text||'').slice(0,120)}\n    🔗 ${t.FirstURL}`).join('\n\n');
+  }catch(e){return `YouTube error: ${e.message}`;}
+}
+function toolSaveMemory(category,key,value){
+  if(!memory[category])memory[category]={};
+  memory[category][key]={value,saved:new Date().toISOString()};
+  saveMemory();
+  return 'ok';
+}
+function toolRecallMemory(category,key){
+  if(key){const v=memory[category]?.[key];return v?`${key}: ${v.value||v}`:`Nothing saved for [${category}]/${key}`;}
+  if(category){const c=memory[category];return c?JSON.stringify(c,null,2):`No memories in category: ${category}`;}
+  return formatMemory()||'Memory is empty.';
+}
+function toolListMemory(){return formatMemory()||'Memory is empty.';}
+function toolSetReminder(date,time,message){
+  try{
+    const dt=new Date(`${date}T${time}`);
+    const ms=dt.getTime()-Date.now();
+    if(ms<=0)return 'That time is in the past.';
+    if(!('Notification' in window))return `Reminder noted: "${message}" at ${date} ${time} (notifications not supported in this browser)`;
+    const go=()=>{
+      if(Notification.permission==='granted'){new Notification('E.S.H.U Reminder',{body:message,icon:'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>'});}
+      writeLog(`SYS: ⏰ Reminder: ${message}`,'ls');
+    };
+    if(Notification.permission==='default'){Notification.requestPermission().then(p=>{if(p==='granted')setTimeout(go,ms);});}
+    else if(Notification.permission==='granted'){setTimeout(go,ms);}
+    const mins=Math.round(ms/60000);
+    return `Reminder set: "${message}" in ${mins} minute${mins!==1?'s':''} (${date} ${time})`;
+  }catch(e){return `Reminder error: ${e.message}`;}
+}
+async function toolFlightFinder(origin,destination,date,returnDate,passengers,cabin){
+  try{
+    const q=`flights from ${origin} to ${destination} on ${date}${returnDate?' return '+returnDate:''} ${cabin||'economy'} ${passengers||1} passenger`;
+    const r=await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+    const d=await r.json();
+    const out=d.AbstractText||d.Answer||(d.RelatedTopics||[]).filter(t=>t.Text).slice(0,3).map(t=>t.Text).join('\n');
+    return out||`For flights from ${origin} to ${destination} on ${date}, I recommend checking Google Flights at flights.google.com or Skyscanner.`;
+  }catch(e){return `Flight search error: ${e.message}`;}
+}
+
+// Screen/Camera capture
+async function toolScreenProcess(text){
+  return new Promise((resolve)=>{
+    const modal=document.getElementById('cam-modal');
+    const video=document.getElementById('cam-video');
+    const cvs=document.getElementById('cam-canvas');
+    const captureBtn=document.getElementById('cam-capture');
+    const cancelBtn=document.getElementById('cam-cancel');
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+      .then(stream=>{
+        camStream=stream;
+        video.srcObject=stream;
+        modal.classList.add('show');
+        const onCapture=()=>{
+          cvs.width=video.videoWidth||640;cvs.height=video.videoHeight||480;
+          cvs.getContext('2d').drawImage(video,0,0);
+          const imgData=cvs.toDataURL('image/jpeg',.8).split(',')[1];
+          stream.getTracks().forEach(t=>t.stop());
+          modal.classList.remove('show');
+          captureBtn.removeEventListener('click',onCapture);
+          cancelBtn.removeEventListener('click',onCancel);
+          // Send image via text input with inline_data to ESHU
+          if(wsReady&&ws){
+            ws.send(JSON.stringify({client_content:{turns:[{role:'user',parts:[{text:text||'What do you see in this image?'},{inline_data:{mime_type:'image/jpeg',data:imgData}}]}],turn_complete:true}}));
+            resolve('Vision module activated. Analysing image now.');
+          } else {resolve('Vision module ready but not connected.');}
+        };
+        const onCancel=()=>{stream.getTracks().forEach(t=>t.stop());modal.classList.remove('show');captureBtn.removeEventListener('click',onCapture);cancelBtn.removeEventListener('click',onCancel);resolve('Vision cancelled by user.');};
+        captureBtn.addEventListener('click',onCapture);
+        cancelBtn.addEventListener('click',onCancel);
+      })
+      .catch(e=>resolve(`Camera error: ${e.message}. Try allowing camera permission.`));
+  });
+}
+
+async function dispatchTool(name,args){
+  writeLog(`  → ${name}(${Object.keys(args||{}).map(k=>`${k}=${JSON.stringify(args[k])}`).join(', ')})`.slice(0,120),'ls');
+  try{
+    switch(name){
+      case 'web_search':     return await toolWebSearch(args.query);
+      case 'weather_report': return await toolWeather(args.city||args.location);
+      case 'youtube_video':  return await toolYouTube(args.action,args.query,args.url);
+      case 'save_memory':    return toolSaveMemory(args.category||'notes',args.key,args.value);
+      case 'recall_memory':  return toolRecallMemory(args.category,args.key);
+      case 'list_memory':    return toolListMemory();
+      case 'screen_process': return await toolScreenProcess(args.text);
+      case 'reminder':       return toolSetReminder(args.date,args.time,args.message);
+      case 'flight_finder':  return await toolFlightFinder(args.origin,args.destination,args.date,args.return_date,args.passengers,args.cabin);
+      // Graceful degradation for unavailable tools
+      case 'open_app':       return `Cannot open apps on Android/browser. I can open websites instead — just say which site.`;
+      case 'computer_settings': return `System controls aren't available on Android/browser. You can adjust those on your device directly.`;
+      case 'cmd_control':    return `Terminal commands aren't available in the browser. On your PC, this would run in CMD.`;
+      case 'browser_control':return `Browser automation via Playwright isn't available on mobile. I can tell you how to navigate manually.`;
+      case 'file_controller':return `File system access isn't available in the browser. On your PC version this would work.`;
+      case 'send_message':   return `Desktop messaging apps aren't accessible from the browser. Use your phone's messaging app directly.`;
+      case 'game_updater':   return `Steam/Epic integration isn't available on Android. Please update games on your PC.`;
+      case 'computer_control':return `Direct computer control requires the PC version of ESHU.`;
+      case 'code_helper':    return `Code execution requires the PC version of ESHU. I can still write and explain code for you here.`;
+      case 'dev_agent':      return `Full dev agent mode requires the PC version of ESHU.`;
+      case 'agent_task':     return `Complex multi-step agent tasks work best on the PC version. What are you trying to accomplish? I'll help directly.`;
+      default:               return `Tool "${name}" is not available on this platform.`;
+    }
+  }catch(e){return `Tool error (${name}): ${e.message}`;}
+}
+
+// ═══════════════════════════════════════════════════
+//  GEMINI LIVE WEBSOCKET
+// ═══════════════════════════════════════════════════
+function buildSetupMsg(model){
+  const mem=formatMemory();
+  const now=new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const sysParts=[`[CURRENT DATE & TIME]\nRight now it is: ${now}\nUse this for calculating exact times for reminders.\n`,SYS_PROMPT];
+  if(mem)sysParts.push(`\n[LONG-TERM MEMORY]\n${mem}`);
+  return {setup:{model,generation_config:{response_modalities:['AUDIO'],speech_config:{voice_config:{prebuilt_voice_config:{voice_name:'Charon'}}}},output_audio_transcription:{},input_audio_transcription:{},system_instruction:{parts:[{text:sysParts.join('\n\n')}]},tools:[{function_declarations:[
+    {name:'web_search',description:'Search the web for any current information, news, facts, or general knowledge. Always call this instead of guessing.',parameters:{type:'OBJECT',properties:{query:{type:'STRING',description:'Search query'}},required:['query']}},
+    {name:'weather_report',description:'Get real-time weather for any city.',parameters:{type:'OBJECT',properties:{city:{type:'STRING',description:'City name'}},required:['city']}},
+    {name:'youtube_video',description:'Search for YouTube videos. Returns titles and links. Use for play, summarize, get_info, trending actions.',parameters:{type:'OBJECT',properties:{action:{type:'STRING',description:'play|summarize|get_info|trending'},query:{type:'STRING',description:'Search query'},url:{type:'STRING',description:'Video URL for get_info'}},required:[]}},
+    {name:'save_memory',description:'Save important personal fact about user silently. Call when user reveals name, city, job, preferences, projects. Do NOT announce. Categories: identity|preferences|projects|relationships|wishes|notes.',parameters:{type:'OBJECT',properties:{category:{type:'STRING'},key:{type:'STRING'},value:{type:'STRING'}},required:['category','key','value']}},
+    {name:'recall_memory',description:'Retrieve a saved memory item.',parameters:{type:'OBJECT',properties:{category:{type:'STRING'},key:{type:'STRING'}},required:[]}},
+    {name:'list_memory',description:'List all saved memories.',parameters:{type:'OBJECT',properties:{}}},
+    {name:'screen_process',description:'Activate the camera to visually analyse what the user is showing. Call when asked to look at something, analyse image, or see through camera.',parameters:{type:'OBJECT',properties:{text:{type:'STRING',description:'Question or instruction about the image'},angle:{type:'STRING',description:'camera (default)'}},required:['text']}},
+    {name:'reminder',description:'Set a timed reminder that fires a browser notification.',parameters:{type:'OBJECT',properties:{date:{type:'STRING',description:'YYYY-MM-DD'},time:{type:'STRING',description:'HH:MM (24h)'},message:{type:'STRING'}},required:['date','time','message']}},
+    {name:'flight_finder',description:'Search for flight information between cities.',parameters:{type:'OBJECT',properties:{origin:{type:'STRING'},destination:{type:'STRING'},date:{type:'STRING'},return_date:{type:'STRING'},passengers:{type:'INTEGER'},cabin:{type:'STRING',description:'economy|business|first'}},required:['origin','destination','date']}},
+  ]}]}};
+}
+
+function connectWebSocket(model){
+  if(ws){try{ws.close();}catch(e){}}
+  ws=null; wsReady=false;
+  setState('CONNECTING');
+  writeLog(`SYS: Connecting to Gemini Live (${model.split('/')[1]})…`,'ls');
+  const url=`${WS_BASE}?key=${apiKey}`;
+  try{
+    ws=new WebSocket(url);
+    ws.binaryType='arraybuffer';
+  }catch(e){
+    writeLog(`ERR: WebSocket failed — ${e.message}`,'lr');
+    setState('INITIALISING'); return;
+  }
+  ws.onopen=()=>{
+    writeLog('SYS: WebSocket open. Sending setup…','ls');
+    ws.send(JSON.stringify(buildSetupMsg(model)));
+  };
+  ws.onmessage=async(ev)=>{
+    let msg;
+    try{msg=JSON.parse(typeof ev.data==='string'?ev.data:new TextDecoder().decode(ev.data));}
+    catch(e){return;}
+    await handleServerMsg(msg);
+  };
+  ws.onerror=(ev)=>{
+    writeLog('ERR: WebSocket error. Retrying in 5s…','lr');
+    setState('INITIALISING');
+  };
+  ws.onclose=(ev)=>{
+    wsReady=false;
+    if(ev.code===1006&&model===LIVE_MODEL){
+      writeLog(`SYS: Primary model unavailable. Trying fallback…`,'ls');
+      wsModel=LIVE_MODEL2;
+      setTimeout(()=>connectWebSocket(LIVE_MODEL2),2000);
+    } else if(ev.wasClean===false){
+      writeLog(`SYS: Connection lost (${ev.code}). Reconnecting in 5s…`,'ls');
+      setTimeout(()=>connectWebSocket(wsModel),5000);
+    } else {
+      writeLog('SYS: Connection closed.','ls');
+      setState('INITIALISING');
+    }
+    document.getElementById('i-conn').textContent='offline';
+    document.getElementById('i-conn').style.color='var(--red)';
+  };
+}
+
+async function handleServerMsg(msg){
+  // Setup complete
+  if(msg.setup_complete||msg.setupComplete){
+    wsReady=true;
+    setState('LISTENING');
+    document.getElementById('i-conn').textContent='online';
+    document.getElementById('i-conn').style.color='var(--green)';
+    writeLog('SYS: ESHU online — Gemini Live connected.','ls');
+    writeLog(`SYS: Speaking in Charon voice | Model: ${wsModel.split('/')[1]}`,'ls');
+    // Auto greet
+    setTimeout(()=>{
+      if(wsReady&&ws){
+        const mem=formatMemory();
+        const name=memory?.identity?.name?.value||memory?.identity?.user_name?.value||'';
+        const g=GREETINGS[Math.floor(Math.random()*GREETINGS.length)];
+        const greeting=name?`Welcome back, ${name}. ${g}`:g;
+        sendText(greeting); // ESHU speaks greeting itself
+      }
+    },700);
+    return;
+  }
+
+  // Server content (audio + transcription)
+  const sc=msg.server_content||msg.serverContent;
+  if(sc){
+    // Audio data
+    const parts=sc.model_turn?.parts||sc.modelTurn?.parts||[];
+    for(const p of parts){
+      const id=p.inline_data||p.inlineData;
+      if(id&&id.data){
+        const mime=id.mime_type||id.mimeType||'';
+        if(mime.includes('audio')||mime.includes('pcm')){
+          enqueueAudio(id.data);
+          setState('SPEAKING');
+        }
+      }
+      if(p.text){writeLog(`Eshu: ${p.text}`,'le');}
+    }
+    // Output transcription (what ESHU said)
+    const ot=sc.output_transcription||sc.outputTranscription;
+    if(ot?.text){
+      if(outputBuf.length===0)setState('SPEAKING');
+      outputBuf.push(ot.text);
+    }
+    // Input transcription (what user said)
+    const it=sc.input_transcription||sc.inputTranscription;
+    if(it?.text){inputBuf.push(it.text);}
+    // Turn complete
+    if(sc.turn_complete||sc.turnComplete){
+      if(outputBuf.length){writeLog(`Eshu: ${outputBuf.join('')}`,'le');outputBuf=[];}
+      if(inputBuf.length){writeLog(`You: ${inputBuf.join('')}`,'ly');inputBuf=[];}
+      if(!isPlaying)setState(muted?'MUTED':'LISTENING');
+    }
+  }
+
+  // Tool calls
+  const tc=msg.tool_call||msg.toolCall;
+  if(tc){
+    const fns=tc.function_calls||tc.functionCalls||[];
+    setState('THINKING');
+    const responses=[];
+    for(const fc of fns){
+      const result=await dispatchTool(fc.name,fc.args||{});
+      responses.push({id:fc.id,name:fc.name,response:{result}});
+    }
+    if(wsReady&&ws){
+      ws.send(JSON.stringify({tool_response:{function_responses:responses}}));
+    }
+    setState(muted?'MUTED':'LISTENING');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  AUDIO: PLAYBACK (PCM 24000Hz → AudioContext)
+// ═══════════════════════════════════════════════════
+function ensureAudioCtx(){
+  if(!audioCtx||audioCtx.state==='closed'){
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:24000});
+  }
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function b64ToFloat32(b64){
+  const bin=atob(b64),bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const i16=new Int16Array(bytes.buffer),f32=new Float32Array(i16.length);
+  for(let i=0;i<i16.length;i++)f32[i]=i16[i]/32768;
+  return f32;
+}
+let nextPlayTime=0;
+function enqueueAudio(b64){
+  const ac=ensureAudioCtx();
+  const f32=b64ToFloat32(b64);
+  if(!f32.length)return;
+  const buf=ac.createBuffer(1,f32.length,24000);
+  buf.copyToChannel(f32,0);
+  const src=ac.createBufferSource();
+  src.buffer=buf;
+  src.connect(ac.destination);
+  const now=ac.currentTime;
+  if(nextPlayTime<now)nextPlayTime=now+0.05;
+  src.start(nextPlayTime);
+  nextPlayTime+=buf.duration;
+  isPlaying=true;
+  src.onended=()=>{if(nextPlayTime<=ac.currentTime){isPlaying=false;if(!muted)setState('LISTENING');}};
+}
+
+// ═══════════════════════════════════════════════════
+//  AUDIO: CAPTURE (Mic → PCM 16000Hz → WS)
+// ═══════════════════════════════════════════════════
+function f32ToB64(f32){
+  const i16=new Int16Array(f32.length);
+  for(let i=0;i<f32.length;i++){const s=Math.max(-1,Math.min(1,f32[i]));i16[i]=s<0?s*0x8000:s*0x7FFF;}
+  const bytes=new Uint8Array(i16.buffer),chars=[];
+  for(let i=0;i<bytes.length;i++)chars.push(String.fromCharCode(bytes[i]));
+  return btoa(chars.join(''));
+}
+
+async function startMic(){
+  if(micActive)return;
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:16000},video:false});
+    // Use a 16kHz AudioContext for mic capture
+    const capCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+    if(capCtx.state==='suspended')await capCtx.resume();
+    micSource=capCtx.createMediaStreamSource(micStream);
+    // ScriptProcessorNode — widely supported including Android Chrome
+    processor=capCtx.createScriptProcessor(4096,1,1);
+    processor.onaudioprocess=(e)=>{
+      if(muted||!wsReady||!ws||ws.readyState!==WebSocket.OPEN)return;
+      const samples=e.inputBuffer.getChannelData(0);
+      // Simple voice activity check — skip silent chunks
+      let rms=0;for(let i=0;i<samples.length;i++)rms+=samples[i]*samples[i];rms=Math.sqrt(rms/samples.length);
+      if(rms<0.003)return; // skip near-silence
+      const b64=f32ToB64(samples);
+      ws.send(JSON.stringify({realtime_input:{media_chunks:[{mime_type:'audio/pcm;rate=16000',data:b64}]}}));
+    };
+    micSource.connect(processor);
+    processor.connect(capCtx.destination);
+    micActive=true;
+    const btn=document.getElementById('btn-mic');
+    btn.textContent='🔴  MIC ON';
+    btn.classList.add('live');
+    writeLog('SYS: Microphone active — speak naturally','ls');
+  }catch(e){
+    writeLog(`ERR: Microphone — ${e.message}`,'lr');
+  }
+}
+
+function stopMic(){
+  if(!micActive)return;
+  try{
+    if(processor){processor.disconnect();processor=null;}
+    if(micSource){micSource.disconnect();micSource=null;}
+    if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}
+  }catch(e){}
+  micActive=false;
+  const btn=document.getElementById('btn-mic');
+  btn.textContent='🎤  START MIC';
+  btn.classList.remove('live');
+  btn.classList.remove('muted-mic');
+  writeLog('SYS: Microphone stopped','ls');
+}
+
+function sendText(text){
+  if(!wsReady||!ws||ws.readyState!==WebSocket.OPEN){writeLog('ERR: Not connected. Tap RECONNECT in settings.','lr');return;}
+  ws.send(JSON.stringify({client_content:{turns:[{role:'user',parts:[{text}]}],turn_complete:true}}));
+}
+
+// ═══════════════════════════════════════════════════
+//  API KEY: VALIDATE & SAVE
+// ═══════════════════════════════════════════════════
+async function validateKey(key){
+  // Quick HTTP call to check key validity
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${r.status}`);}
+  return true;
+}
+
+// ═══════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════
+const bootEl=document.getElementById('boot');
+const bootBar=document.getElementById('boot-bar');
+const bootMsg=document.getElementById('boot-msg');
+const STEPS=[[15,'LOADING NEURAL CORE…'],[30,'INITIALISING MEMORY BANKS…'],[50,'CONNECTING GEMINI LIVE…'],[70,'LOADING TOOL MODULES…'],[85,'CALIBRATING AUDIO PIPELINE…'],[100,'ALL SYSTEMS ONLINE']];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function runBoot(){
+  for(const[pct,msg]of STEPS){bootBar.style.width=pct+'%';bootMsg.textContent=msg;await sleep(pct===50?550:320);}
+  await sleep(300);bootEl.classList.add('hidden');await sleep(600);bootEl.style.display='none';
+}
+async function bootEshu(){
+  memory=loadMemory();
+  await runBoot();
+  writeLog('SYS: ESHU MARK XXXV booting…','ls');
+  writeLog('SYS: API key loaded from device storage.','ls');
+  connectWebSocket(LIVE_MODEL);
+}
+
+// ═══════════════════════════════════════════════════
+//  API KEY MODAL
+// ═══════════════════════════════════════════════════
+const apiModal=document.getElementById('api-modal');
+const apiIn=document.getElementById('api-in');
+const apiGo=document.getElementById('api-go');
+const apiErr=document.getElementById('api-err');
+function showApiModal(){apiModal.classList.add('show');setTimeout(()=>apiIn.focus(),100);}
+function hideApiModal(){apiModal.classList.remove('show');}
+apiGo.addEventListener('click',async()=>{
+  const key=apiIn.value.trim();
+  if(!key){apiErr.textContent='Please enter your API key.';return;}
+  if(!key.startsWith('AIza')){apiErr.textContent='Key should start with "AIza…"';return;}
+  apiGo.disabled=true;apiGo.textContent='⏳ VALIDATING…';apiErr.textContent='';
+  try{
+    await validateKey(key);
+    apiKey=key;localStorage.setItem(KEY_STORE,key);
+    hideApiModal();bootEshu();
+  }catch(e){apiErr.textContent=`Invalid key: ${e.message}`;}
+  finally{apiGo.disabled=false;apiGo.textContent='▸ BOOT ESHU';}
+});
+apiIn.addEventListener('keydown',e=>{if(e.key==='Enter')apiGo.click();});
+
+// ═══════════════════════════════════════════════════
+//  SETTINGS PANEL
+// ═══════════════════════════════════════════════════
+const spEl=document.getElementById('sp');
+function openSettings(){
+  const stored=localStorage.getItem(KEY_STORE)||'';
+  document.getElementById('i-key').textContent=stored?`✓ ${stored.slice(0,8)}…${stored.slice(-4)}`:'✗ None';
+  document.getElementById('i-mem').textContent=Object.keys(memory).length;
+  document.getElementById('i-conn').textContent=wsReady?'online':'offline';
+  document.getElementById('i-conn').style.color=wsReady?'var(--green)':'var(--red)';
+  spEl.classList.add('open');
+}
+function closeSettings(){spEl.classList.remove('open');}
+document.getElementById('btn-gear').addEventListener('click',openSettings);
+document.getElementById('sclose').addEventListener('click',closeSettings);
+spEl.addEventListener('click',e=>{if(e.target===spEl)closeSettings();});
+
+document.getElementById('s-save').addEventListener('click',async()=>{
+  const key=document.getElementById('s-key').value.trim();
+  const ss=document.getElementById('s-st');
+  if(!key){ss.style.color='var(--red)';ss.textContent='Enter a key first.';return;}
+  const btn=document.getElementById('s-save');
+  btn.disabled=true;btn.textContent='⏳ VALIDATING…';ss.textContent='';
+  try{
+    await validateKey(key);
+    apiKey=key;localStorage.setItem(KEY_STORE,key);
+    document.getElementById('s-key').value='';
+    ss.style.color='var(--green)';ss.textContent='✓ Saved! Reconnecting…';
+    await sleep(1000);closeSettings();stopMic();wsModel=LIVE_MODEL;connectWebSocket(LIVE_MODEL);
+  }catch(e){ss.style.color='var(--red)';ss.textContent=`✗ ${e.message}`;}
+  finally{btn.disabled=false;btn.textContent='💾 SAVE & RECONNECT';}
+});
+document.getElementById('s-reconnect').addEventListener('click',()=>{
+  closeSettings();stopMic();wsModel=LIVE_MODEL;connectWebSocket(LIVE_MODEL);
+});
+document.getElementById('s-clrmem').addEventListener('click',()=>{
+  memory={};saveMemory();
+  document.getElementById('i-mem').textContent='0';
+  document.getElementById('s-st').style.color='var(--acc2)';
+  document.getElementById('s-st').textContent='✓ Memory cleared.';
+  writeLog('SYS: Long-term memory cleared.','ls');
+});
+document.getElementById('s-reset').addEventListener('click',()=>{
+  if(!confirm('Full reset: removes API key + memory. Continue?'))return;
+  localStorage.removeItem(KEY_STORE);localStorage.removeItem(MEM_STORE);location.reload();
+});
+
+// ═══════════════════════════════════════════════════
+//  MAIN UI EVENTS
+// ═══════════════════════════════════════════════════
+document.getElementById('btn-send').addEventListener('click',()=>{
+  const t=document.getElementById('txt-in').value.trim();
+  if(!t)return;
+  document.getElementById('txt-in').value='';
+  // Ensure AudioContext is live (mobile requires user gesture)
+  ensureAudioCtx();
+  writeLog(`You: ${t}`,'ly');
+  sendText(t);
+});
+document.getElementById('txt-in').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btn-send').click();});
+document.getElementById('btn-mic').addEventListener('click',async()=>{
+  ensureAudioCtx(); // unlock audio on user gesture
+  if(micActive){stopMic();}else{await startMic();}
+});
+document.getElementById('btn-mute').addEventListener('click',()=>{
+  muted=!muted;
+  const btn=document.getElementById('btn-mute');
+  if(muted){
+    btn.textContent='🔇  MUTED';btn.classList.add('muted');setState('MUTED');
+    // Stop any playing audio
+    if(audioCtx){try{audioCtx.suspend();}catch(e){}}
+    // Visually dim mic button
+    document.getElementById('btn-mic').classList.add('muted-mic');
+    writeLog('SYS: Muted — ESHU will not speak or hear.','ls');
+  } else {
+    btn.textContent='🎙  LIVE';btn.classList.remove('muted');setState('LISTENING');
+    document.getElementById('btn-mic').classList.remove('muted-mic');
+    if(audioCtx)audioCtx.resume();
+    writeLog('SYS: Unmuted.','ls');
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  APP ENTRY POINT
+// ═══════════════════════════════════════════════════
+window.addEventListener('load',async()=>{
+  const stored=localStorage.getItem(KEY_STORE);
+  if(stored){
+    apiKey=stored;
+    await bootEshu();
+  } else {
+    await runBoot();
+    showApiModal();
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  FULLSCREEN — Android Chrome Compatible
+// ═══════════════════════════════════════════════════
+const fsBanner = document.getElementById('fs-banner');
+
+function isFullscreen(){
+  return !!(document.fullscreenElement||
+    document.webkitFullscreenElement||
+    document.mozFullScreenElement||
+    document.msFullscreenElement);
+}
+
+function requestFullscreen(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen||
+               el.webkitRequestFullscreen||
+               el.mozRequestFullScreen||
+               el.msRequestFullscreen;
+  if(req){
+    req.call(el, {navigationUI:'hide'}).catch(()=>{});
+  }
+  // Also attempt screen orientation lock to portrait
+  if(screen.orientation && screen.orientation.lock){
+    screen.orientation.lock('portrait').catch(()=>{});
+  }
+}
+
+function showFsBanner(){
+  // Only show on mobile / touch devices
+  if(window.matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0){
+    fsBanner.classList.remove('hidden');
+  }
+}
+function hideFsBanner(){ fsBanner.classList.add('hidden'); }
+
+// Auto-enter fullscreen on first user interaction
+let fsTriggered = false;
+function onFirstInteraction(){
+  if(fsTriggered) return;
+  fsTriggered = true;
+  if(!isFullscreen()) requestFullscreen();
+}
+
+// Listen for any touch/click to trigger
+document.addEventListener('touchstart', onFirstInteraction, {once:true, passive:true});
+document.addEventListener('click', onFirstInteraction, {once:true});
+
+// Show banner after boot if not already fullscreen
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    if(!isFullscreen()) showFsBanner();
+  }, 3500); // wait for boot animation
+});
+
+// Clicking banner explicitly enters fullscreen
+fsBanner.addEventListener('click', ()=>{
+  requestFullscreen();
+  hideFsBanner();
+});
+
+// Track fullscreen changes
+function onFsChange(){
+  if(isFullscreen()){
+    hideFsBanner();
+    writeLog('SYS: Fullscreen mode active.','ls');
+  } else {
+    // Briefly show banner so user can re-enter
+    fsTriggered = false;
+    showFsBanner();
+  }
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
+document.addEventListener('mozfullscreenchange', onFsChange);
+document.addEventListener('MSFullscreenChange', onFsChange);
+</script>
+</body>
+</html>
